@@ -1,0 +1,38 @@
+service: file-UploaderService-test-vladi
+# The `provider` block defines where your service will be deployed
+custom:
+  bucket: lambda-to-upload-retrieve-images
+ 
+# The `provider` block defines where your service will be deployed
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-1
+  stackName: fileUploaderVlad
+  apiGateway:
+    binaryMediaTypes:
+      - '*/*'
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+        - "s3:PutObject"
+        - "s3:GetObject"
+      Resource:
+        - "arn:aws:s3:::${self:custom.bucket}/*"
+# The `functions` block defines what code to deploy
+functions:
+  UploadFileVlad:
+    handler: fileUploader.handler
+    events:
+      - http:
+          path: upload
+          method: post
+          cors: true
+    environment:
+      Bucket: ${self:custom.bucket} 
+resources:
+  Resources:
+    StorageBucket:
+      Type: "AWS::S3::Bucket"
+      Properties:
+        BucketName: ${self:custom.bucket}
